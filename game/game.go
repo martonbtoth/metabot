@@ -6,7 +6,9 @@ package game
 import "C"
 
 import (
+	"fmt"
 	"slices"
+	"superbot/logger"
 	"unsafe"
 )
 
@@ -19,6 +21,7 @@ type Game interface {
 	EnumerateVisibleObjectsCallback(filter int, guid uint64)
 	GetVisibleObjects() []WowObject
 	GetVisibleObjectByGuid(guid uint64) *WowObject
+	MoveToPosition(position Vec3)
 }
 
 type game struct {
@@ -31,6 +34,7 @@ func GetGame() *Game {
 	if globalGame == nil {
 		globalGame = &game{}
 	}
+	C.FixClickToMove()
 	return &globalGame
 }
 
@@ -104,6 +108,11 @@ func (g *game) GetVisibleObjectByGuid(guid uint64) *WowObject {
 	allObjects := g.GetVisibleObjects()
 	index := slices.IndexFunc(allObjects, func(w WowObject) bool { return w.Guid == guid })
 	return &allObjects[index]
+}
+
+func (g *game) MoveToPosition(position Vec3) {
+	logger.GetLogger().Log(fmt.Sprintf("Moving to position %v", position))
+	C.ClickToMove(C.float(position.X), C.float(position.Y), C.float(position.Z))
 }
 
 //export EnumerateVisibleObjectsCallback

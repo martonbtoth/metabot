@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"superbot/game"
+	"superbot/logger"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -22,6 +23,7 @@ type ObjectTree struct {
 }
 
 func NewObjectTree(g game.Game) *ObjectTree {
+	logger := logger.GetLogger()
 	objectTree := &ObjectTree{g: g}
 	objectTree.ExtendBaseWidget(objectTree)
 	objectTree.ChildUIDs = func(id widget.TreeNodeID) []widget.TreeNodeID {
@@ -44,7 +46,7 @@ func NewObjectTree(g game.Game) *ObjectTree {
 			leaves := []string{}
 			for k, v := range mappedAttrs {
 				s := formatValue(k, v)
-				leaves = append(leaves, "attr:"+s+"wowobject:"+id)
+				leaves = append(leaves, "attr:"+s+id)
 			}
 			sort.Strings(leaves)
 			return leaves
@@ -76,6 +78,13 @@ func NewObjectTree(g game.Game) *ObjectTree {
 			cut, _ := strings.CutPrefix(id, "attr:")
 			split := strings.Split(cut, "wowobject:")
 			label.SetText(split[0])
+			moveButton.OnTapped = func() {
+				guidString := split[1]
+				guid, _ := strconv.ParseUint(guidString, 10, 64)
+				object := g.GetVisibleObjectByGuid(guid)
+				logger.Log("Unit found: " + object.Name)
+				g.MoveToPosition(object.Position)
+			}
 			moveButton.Hidden = !strings.Contains(id, "Position")
 		}
 

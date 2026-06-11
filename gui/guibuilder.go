@@ -41,8 +41,4 @@ func buildGui(gui *gui) {
 	}
 
 	gui.window.SetContent(gui.tabs)
-
-	gui.log = ""
-	gui.AppendLog("SuperBot started")
-	gui.terminal.SetText(gui.log)
 }

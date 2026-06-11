@@ -5,13 +5,58 @@ import (
 	"log"
 	"syscall"
 	"time"
+	"unsafe"
 
 	"golang.org/x/sys/windows"
 )
 
+func setSeDebugPrivilege() {
+	// Get current process (the one I wanna change)
+	handle, err := windows.GetCurrentProcess()
+	defer windows.CloseHandle(handle)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Get the current process token
+	var token windows.Token
+	err = windows.OpenProcessToken(handle, windows.TOKEN_ADJUST_PRIVILEGES, &token)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Check the LUID
+	var luid windows.LUID
+	seDebugName, err := windows.UTF16FromString("SeDebugPrivilege")
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = windows.LookupPrivilegeValue(nil, &seDebugName[0], &luid)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Modify the token
+	var tokenPriviledges windows.Tokenprivileges
+	tokenPriviledges.PrivilegeCount = 1
+	tokenPriviledges.Privileges[0].Luid = luid
+	tokenPriviledges.Privileges[0].Attributes = windows.SE_PRIVILEGE_ENABLED
+
+	// Adjust token privs
+	tokPrivLen := uint32(unsafe.Sizeof(tokenPriviledges))
+	fmt.Printf("Length is %d\n", tokPrivLen)
+	err = windows.AdjustTokenPrivileges(token, false, &tokenPriviledges, tokPrivLen, nil, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Debug Priviledge granted")
+}
+
 func main() {
 
-	dPath := "..\\dll\\superbot.dll" //Path to the DLL file to inject
+	setSeDebugPrivilege()
+
+	dPath := "C:\\superbot\\cmd\\dll\\superbot.dll" //Path to the DLL file to inject
 	gamePath := "C:\\wow\\WoW.exe"
 	////
 

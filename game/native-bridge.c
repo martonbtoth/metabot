@@ -9,6 +9,8 @@
 const int GET_PLAYER_GUID_FUN_PTR = 0x00468550;
 const int ENUMERATE_VISIBLE_OBJECTS_FUN_PTR = 0x00468380;
 const int GET_OBJECT_PTR_FUN_PTR = 0x00464870;
+const int CLICK_TO_MOVE_FUN_PTR = 0x00611130;
+const int CLICK_TO_MOVE_FIX_PTR = 0x860A90;
 const uint32_t UNIT_NAME_OFFSET = 0xB30;
 const int* NAME_LIST_POINTER = 0xC0E230;
 const int NAME_PTR_GUID_OFFSET = 0xC;
@@ -21,6 +23,12 @@ const int POS_Y_OFFSET = 0x9BC;
 const int POS_Z_OFFSET = 0x9C0;
 
 extern int EnumerateVisibleObjectsCallback(int filter, uint64_t guid);
+
+typedef struct {
+    float X;
+    float Y;
+    float Z;
+} vec3;
 
 uint64_t GetPlayerGuid() {
     uint64_t (*GetPlayerGuidNative)(void) = (uint64_t (*)(void))GET_PLAYER_GUID_FUN_PTR;
@@ -95,3 +103,36 @@ float GetObjectPositionZ(uint64_t guid) {
     int objectptr = GetObjectPtr(guid);
     return *(float*)(objectptr + POS_Z_OFFSET);
 }
+
+void FixClickToMove() {
+    uint8_t* clickToMoveFixPtr = (uint8_t*)CLICK_TO_MOVE_FIX_PTR;
+    for(int i = 0; i < 4; i++) {
+        *clickToMoveFixPtr = (uint8_t)0x0;
+        clickToMoveFixPtr++;
+    }
+};
+
+// vec3 destination = {0.0, 0.0, 0.0};
+float destination[3] = {0.0, 0.0, 0.0};
+uint64_t interactGuid = 0;
+
+void ClickToMove(float x, float y, float z) {
+    // void __thiscall (*ClickToMoveNative)(uintptr_t, int, uint64_t*, vec3*, float) = (void __thiscall(*)(uintptr_t, int, uint64_t, vec3*, float))CLICK_TO_MOVE_FUN_PTR;
+    typedef void (__thiscall* func)(uintptr_t, uint32_t, unsigned long long*, float*, float);
+    func ClickToMoveNative = (func)CLICK_TO_MOVE_FUN_PTR;
+    uint64_t playerGuid = GetPlayerGuid();
+    int playerPtr = GetObjectPtr(playerGuid);
+    destination[0] = x;
+    destination[1] = y;
+    destination[2] = z;
+    ClickToMoveNative(playerPtr, 0x4, &interactGuid, destination, 2);
+}
+
+// void ClickToMove(ClickType clickType, unsigned long long interactGuid, Position position) {
+//     float* xyz = new float[3];
+//     xyz[0] = position.X; xyz[1] = position.Y; xyz[2] = position.Z;
+//     unsigned long long* interactGuidPtr = &interactGuid;
+//     typedef void (__thiscall* func)(uintptr_t, ClickType, unsigned long long*, float*, float);
+//     func function = (func)CLICK_TO_MOVE_FUN_PTR;
+//     function(Pointer, clickType, interactGuidPtr, xyz, 2);
+// }

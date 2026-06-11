@@ -114,6 +114,11 @@ func (gs *gameServer) StopMovement(context.Context, *Empty) (*Empty, error) {
 	return &Empty{}, nil
 }
 
+func (gs *gameServer) AutoLoot(ctx context.Context, request *AutoLootRequest) (*Empty, error) {
+	gs.game.AutoLoot(*request.TargetGuid)
+	return &Empty{}, nil
+}
+
 func newServer(game game.Game) *gameServer {
 	return &gameServer{game: game}
 }

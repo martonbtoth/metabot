@@ -43,6 +43,7 @@ type Game interface {
 	Jump()
 	ToggleAttack(attack bool)
 	CastSpellByName(spellName string)
+	AutoLoot(guid uint64)
 }
 
 type game struct {
@@ -285,6 +286,11 @@ func (g *game) ToggleAttack(attack bool) {
 
 func (g *game) CastSpellByName(spellName string) {
 	g.RunLua("CastSpellByName('" + spellName + "')")
+}
+
+func (g *game) AutoLoot(guid uint64) {
+	unitPtr := C.GetObjectPtr(C.uint64_t(guid))
+	C.RightClick(unitPtr, C.int(1))
 }
 
 func randStringRunes(n int) string {

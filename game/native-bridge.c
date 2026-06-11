@@ -183,6 +183,10 @@ __fastcall void SignalEventHook(uint32_t event) {
     SignalEventOriginal(event);
 }
 
+void RightClick(int32_t unitPtr, int32_t autoLoot) {
+    RightClickNative(unitPtr, autoLoot);
+}
+
 void HookEvents() {
     Log("Hooking events...");
     if (MH_Initialize() != MH_OK) {

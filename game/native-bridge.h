@@ -22,6 +22,7 @@ float GetObjectPositionZ(uint64_t guid);
 void ClickToMove(float x, float y, float z);
 void StopMovement();
 void SetTarget(uint64_t guid);
+void RightClick(int32_t unitPtr, int32_t autoLoot);
 
 void LuaCall(char* code);
 char* GetText(char* varName);

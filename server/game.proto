@@ -65,6 +65,10 @@ message SetTargetRequest {
 	required uint64 targetGuid = 1;
 }
 
+message AutoLootRequest {
+	required uint64 targetGuid = 1;
+}
+
 service GameService {
     rpc GetPlayerGuid(Empty) returns (PlayerGuid) {}
     rpc GetSpellbook(Empty) returns (Spellbook) {}
@@ -75,4 +79,5 @@ service GameService {
 	rpc Jump(Empty) returns (Empty) {}
 	rpc ToggleAttack(ToggleAttackRequest) returns (Empty) {}
 	rpc CastSpellByName(CastSpellByNameRequest) returns (Empty) {}
+	rpc AutoLoot(AutoLootRequest) returns (Empty) {}
 }

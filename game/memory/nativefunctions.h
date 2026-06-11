@@ -27,4 +27,10 @@ SetTargetNative_t SetTargetNative = 0x00493540;
 typedef char* __fastcall (*GetTextNative_t)(char* varName, unsigned int nonSense, int zero);
 GetTextNative_t GetTextNative = 0x00703BF0;
 
+typedef void __fastcall (*LootSlotNative_t)(uint32_t slot, int32_t unused);
+LootSlotNative_t LootSlotNative = 0x004C2790;
+
+typedef void __thiscall (*RightClickNative_t)(uint32_t unitPtr, int32_t autoLoot);
+RightClickNative_t RightClickNative = 0x60BEA0;
+
 #endif

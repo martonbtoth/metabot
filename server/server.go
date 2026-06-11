@@ -108,6 +108,11 @@ func (gs *gameServer) SetTarget(ctx context.Context, request *SetTargetRequest) 
 	return &Empty{}, nil
 }
 
+func (gs *gameServer) StopMovement(context.Context, *Empty) (*Empty, error) {
+	gs.game.StopMovement()
+	return &Empty{}, nil
+}
+
 func newServer(game game.Game) *gameServer {
 	return &gameServer{game: game}
 }

@@ -34,6 +34,7 @@ type Game interface {
 	GetVisibleObjects() []WowObject
 	GetVisibleObjectByGuid(guid uint64) *WowObject
 	MoveToPosition(position Vec3)
+	StopMovement()
 	SetTarget(guid uint64)
 	RunLua(lua string)
 	RunLuaWithResults(lua string) []string
@@ -213,12 +214,19 @@ func (g *game) GetVisibleObjectByGuid(guid uint64) *WowObject {
 }
 
 func (g *game) MoveToPosition(position Vec3) {
-	logger.GetLogger().Log(fmt.Sprintf("Moving to position %v", position))
+	logger.Log(fmt.Sprintf("Moving to position %v", position))
 
 	C.ClickToMove(C.float(position.X), C.float(position.Y), C.float(position.Z))
 }
 
+func (g *game) StopMovement() {
+	logger.Log("Stopping movement")
+
+	C.StopMovement()
+}
+
 func (g *game) SetTarget(guid uint64) {
+	logger.Log(fmt.Sprintf("Setting target to %v", guid))
 	C.SetTarget(C.uint64_t(guid))
 }
 

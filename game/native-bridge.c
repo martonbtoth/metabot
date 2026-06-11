@@ -39,6 +39,22 @@ const int POS_X_OFFSET = 0x9B8;
 const int POS_Y_OFFSET = 0x9BC;
 const int POS_Z_OFFSET = 0x9C0;
 
+const uint32_t CTM_TYPE_FACE_TARGET = 0x1;
+const uint32_t CTM_TYPE_FACE = 0x2;
+const uint32_t CTM_TYPE_STOP_THROWS_EXCEPTION = 0x3;
+const uint32_t CTM_TYPE_MOVE = 0x4;
+const uint32_t CTM_TYPE_NPC_INTERACT = 0x5;
+const uint32_t CTM_TYPE_LOOT = 0x6;
+const uint32_t CTM_TYPE_OBJ_INTERACT = 0x7;
+const uint32_t CTM_TYPE_FACE_OTHER = 0x8;
+const uint32_t CTM_TYPE_SKIN = 0x9;
+const uint32_t CTM_TYPE_ATTACK_POSITION = 0xA;
+const uint32_t CTM_TYPE_ATTACK_GUID = 0xB;
+const uint32_t CTM_TYPE_CONSTANT_FACE = 0xC;
+const uint32_t CTM_TYPE_NONE = 0xD;
+const uint32_t CTM_TYPE_ATTACK = 0x10;
+const uint32_t CTM_TYPE_IDLE = 0xC;
+
 extern int EnumerateVisibleObjectsCallback(int filter, uint64_t guid);
 extern int WndProcGoCallback(int* hWnd, int Msg, int wParam, int lParam);
 
@@ -163,7 +179,7 @@ float GetObjectPositionZ(uint64_t guid) {
 
 uint64_t interactGuid = 0;
 
-void ClickToMove(float x, float y, float z) {
+void clickToMoveInternal(float x, float y, float z, uint32_t ctmType) {
     float destination[3] = {0.0, 0.0, 0.0};
     // void __thiscall (*ClickToMoveNative)(uintptr_t, int, uint64_t*, vec3*, float) = (void __thiscall(*)(uintptr_t, int, uint64_t, vec3*, float))CLICK_TO_MOVE_FUN_PTR;
     typedef void (__thiscall* func)(uintptr_t, uint32_t, unsigned long long*, float*, float);
@@ -173,7 +189,15 @@ void ClickToMove(float x, float y, float z) {
     destination[0] = x;
     destination[1] = y;
     destination[2] = z;
-    ClickToMoveNative(playerPtr, 0x4, &interactGuid, destination, 2);
+    ClickToMoveNative(playerPtr, ctmType, &interactGuid, destination, 2);
+}
+
+void ClickToMove(float x, float y, float z) {
+    clickToMoveInternal(x, y, z, CTM_TYPE_MOVE);
+}
+
+void StopMovement() {
+    clickToMoveInternal(0.f, 0.f, 0.f, CTM_TYPE_NONE);
 }
 
 void LuaCall(char* code) {

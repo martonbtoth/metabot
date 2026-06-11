@@ -69,6 +69,7 @@ service GameService {
     rpc GetSpellbook(Empty) returns (Spellbook) {}
     rpc GetVisibleObjects(Empty) returns (GameObjects) {}
 	rpc MoveTo(Vec3) returns (Empty) {}
+	rpc StopMovement(Empty) returns (Empty) {}
 	rpc SetTarget(SetTargetRequest) returns (Empty) {}
 	rpc Jump(Empty) returns (Empty) {}
 	rpc ToggleAttack(ToggleAttackRequest) returns (Empty) {}

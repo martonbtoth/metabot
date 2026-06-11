@@ -3,10 +3,13 @@ package main
 import (
 	"superbot/game"
 	"superbot/gui"
+	"superbot/server"
 )
 
 func init() {
-	gui := gui.NewGui(*game.GetGame())
+	game := game.GetGame()
+	gui := gui.NewGui(game)
+	server.Listen(game)
 	gui.Run()
 }
 

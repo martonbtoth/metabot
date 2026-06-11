@@ -39,7 +39,7 @@ type game struct {
 
 var globalGame Game
 
-func GetGame() *Game {
+func GetGame() Game {
 	if globalGame == nil {
 		globalGame = &game{}
 	}
@@ -47,13 +47,22 @@ func GetGame() *Game {
 	UnlockProtectedLuaFunctions()
 	logger.GetLogger().AddListener(func(logBuffer string, s string) {
 		if globalGame.GetPlayerGuid() != 0 {
-			globalGame.RunLua("DEFAULT_CHAT_FRAME:AddMessage('" + s + "')")
+			split := strings.Split(s, "\n")
+			for _, s := range split {
+				globalGame.RunLua("DEFAULT_CHAT_FRAME:AddMessage('" + strings.ReplaceAll(s, "'", "\\'") + "')")
+			}
+
 		}
 	})
-	return &globalGame
+	return globalGame
 }
 
 func (g *game) GetAvailableSpells() []string {
+
+	if g.GetPlayerGuid() == 0 {
+		return []string{}
+	}
+
 	rawSpellsString := g.RunLuaWithResults(enumerateSpellbookLua)[0]
 
 	splitFn := func(c rune) bool {

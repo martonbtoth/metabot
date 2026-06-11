@@ -1,0 +1,22 @@
+option go_package = "./server";
+
+message PlayerGuid {
+    required uint64 PlayerGuid = 1;
+}
+
+message Spellbook {
+    repeated Spell spells = 1;
+}
+
+message Spell {
+    required string name = 1;
+}
+
+message Empty {
+
+}
+
+service GameService {
+    rpc GetPlayerGuid(Empty) returns (PlayerGuid) {}
+    rpc GetSpellbook(Empty) returns (Spellbook) {}
+}

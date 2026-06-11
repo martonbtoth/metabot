@@ -20,7 +20,9 @@ func luaPage(gui *gui) *fyne.Container {
 	runLuaButton := widget.NewButton("Run", func() {
 		lua := luaTextField.Text
 		results := gui.g.RunLuaWithResults(lua)
-		logger.GetLogger().Log(fmt.Sprintf("Lua results: %v", results))
+		if len(results) > 0 {
+			logger.GetLogger().Log(fmt.Sprintf("Lua results: %v", results))
+		}
 	})
 	return container.New(layout.NewBorderLayout(nil, runLuaButton, nil, nil), luaTextField, runLuaButton)
 }

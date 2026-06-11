@@ -18,8 +18,14 @@ import (
 const OBJECT_TYPE_OFFSET = 0x14
 const DESCRIPTOR_OFFSET = 0x8
 
-//go:embed enumerate_spellbook.lua
+//go:embed lua/enumerate_spellbook.lua
 var enumerateSpellbookLua string
+
+//go:embed lua/attack_on.lua
+var attackOnLua string
+
+//go:embed lua/attack_off.lua
+var attackOffLua string
 
 type Game interface {
 	GetPlayerGuid() uint64
@@ -31,6 +37,9 @@ type Game interface {
 	RunLua(lua string)
 	RunLuaWithResults(lua string) []string
 	GetAvailableSpells() []string
+	Jump()
+	ToggleAttack(attack bool)
+	CastSpellByName(spellName string)
 }
 
 type game struct {
@@ -237,6 +246,22 @@ func (g *game) RunLuaWithResults(lua string) []string {
 	}
 
 	return results
+}
+
+func (g *game) Jump() {
+	g.RunLua("Jump()")
+}
+
+func (g *game) ToggleAttack(attack bool) {
+	if attack {
+		g.RunLua(attackOnLua)
+	} else {
+		g.RunLua(attackOffLua)
+	}
+}
+
+func (g *game) CastSpellByName(spellName string) {
+	g.RunLua("CastSpellByName('" + spellName + "')")
 }
 
 func randStringRunes(n int) string {

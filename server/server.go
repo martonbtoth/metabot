@@ -88,6 +88,21 @@ func (gs *gameServer) MoveTo(ctx context.Context, pos *Vec3) (*Empty, error) {
 	return &Empty{}, nil
 }
 
+func (gs *gameServer) Jump(context.Context, *Empty) (*Empty, error) {
+	gs.game.Jump()
+	return &Empty{}, nil
+}
+
+func (gs *gameServer) ToggleAttack(ctx context.Context, request *ToggleAttackRequest) (*Empty, error) {
+	gs.game.ToggleAttack(*request.Attack)
+	return &Empty{}, nil
+}
+
+func (gs *gameServer) CastSpellByName(ctx context.Context, request *CastSpellByNameRequest) (*Empty, error) {
+	gs.game.CastSpellByName(*request.SpellName)
+	return &Empty{}, nil
+}
+
 func newServer(game game.Game) *gameServer {
 	return &gameServer{game: game}
 }

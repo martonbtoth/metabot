@@ -2,6 +2,7 @@
 #define _NATIVE_BRIDGE_H
 
 #include "native-bridge.h"
+#include "threadhelper.h"
 #include <stdint.h>
 #include <string.h>
 #include <windows.h>
@@ -10,10 +11,10 @@
 
 const int GET_PLAYER_GUID_FUN_PTR = 0x00468550;
 const int ENUMERATE_VISIBLE_OBJECTS_FUN_PTR = 0x00468380;
-const int LUA_CALL_FUN_PTR = 0x00704CD0;
 const int GET_OBJECT_PTR_FUN_PTR = 0x00464870;
 const int CLICK_TO_MOVE_FUN_PTR = 0x00611130;
 const int CLICK_TO_MOVE_FIX_PTR = 0x860A90;
+const int LUA_CALL_FUN_PTR = 0x00704CD0;
 const uint32_t UNIT_NAME_OFFSET = 0xB30;
 const int* NAME_LIST_POINTER = 0xC0E230;
 const int NAME_PTR_GUID_OFFSET = 0xC;
@@ -123,32 +124,13 @@ void ClickToMove(float x, float y, float z) {
     ClickToMoveNative(playerPtr, 0x4, &interactGuid, destination, 2);
 }
 
-int oldCallback = 0;
-char* luaCallCode = 0;
-
 void LuaCall(char* code) {
-    luaCallCode  = code;
-}
-
-void luaCalInternal() {
-    typedef void __fastcall func(char* code, const char* unused);
-    func* f = (func*)LUA_CALL_FUN_PTR;
-    f(luaCallCode, "Superbot");
-    return;
-}
-
-int WndProcCallback(int* hWnd, int Msg, int wParam, int lParam) {
-    if (luaCallCode != 0) {
-        luaCalInternal();
-        luaCallCode = 0;
+    void luaCalInternal() {
+        typedef void __fastcall func(char* code, const char* unused);
+        func* f = (func*)LUA_CALL_FUN_PTR;
+        f(code, "Superbot");
+        return;
     }
-    return CallWindowProc(oldCallback, hWnd, Msg, wParam, lParam);
+    RunOnMainThread(luaCalInternal);
 }
 
-void SetOldCallback(int callback) {
-    oldCallback = callback;
-}
-
-int GetWndProcCallbackPtr() {
-    return WndProcCallback;
-}

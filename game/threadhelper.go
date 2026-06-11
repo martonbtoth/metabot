@@ -2,6 +2,7 @@ package game
 
 /*
 #include "native-bridge.h"
+#include "threadhelper.h"
 */
 import "C"
 
@@ -73,6 +74,7 @@ func GetWindowText(hwnd syscall.Handle, str *uint16, maxCount int32) (len int32,
 	return
 }
 
+//export NotifyMainThread
 func NotifyMainThread() {
 	if oldCallback == 0 {
 		mainWindow, _ = FindWindow("World of Warcraft")

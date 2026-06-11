@@ -32,7 +32,7 @@ func buildGui(gui *gui) {
 
 	luaTextField := widget.NewEntry()
 	luaTextField.MultiLine = true
-	luaTextField.Text = "Jump()"
+	luaTextField.Text = "DefaultServerLogin(\"totlol\", \"a\")\nCharacterSelect_SelectCharacter(1)\nEnterWorld()"
 	runLuaButton := widget.NewButton("Run", func() {
 		lua := luaTextField.Text
 		gui.g.RunLua(lua)

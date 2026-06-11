@@ -14,7 +14,3 @@ float GetObjectPositionZ(uint64_t guid);
 void ClickToMove(float x, float y, float z);
 
 void LuaCall(char* code);
-
-int WndProcCallback(int* hWnd, int Msg, int wParam, int lParam);
-void SetOldCallback(int callback);
-int GetWndProcCallbackPtr();

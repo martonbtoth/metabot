@@ -3,6 +3,9 @@ Metabot
 
 Vanilla WoW bot framework, exclusively for 1.12.1 build 5875.
 
+[![Youtube Video](https://github.com/user-attachments/assets/7d999f78-fae0-4393-b283-dc4efa254bee)](https://youtu.be/TAmxtBlt3cQ)
+
+
 ## Building
 
 Requirements:

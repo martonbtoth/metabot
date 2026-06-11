@@ -1,9 +1,9 @@
 package main
 
 import (
-	"superbot/game"
-	"superbot/gui"
-	"superbot/server"
+	"metabot/game"
+	"metabot/gui"
+	"metabot/server"
 )
 
 func init() {

@@ -1,4 +1,5 @@
 option go_package = "./server";
+option java_package = "dev.martontoth.metabot";
 
 message PlayerGuid {
     required uint64 PlayerGuid = 1;
@@ -37,6 +38,8 @@ message GameObject {
 	optional int32 Rage = 11;
 	optional int32 Energy = 12;
 	optional int32 CurrentSpellcastId = 13;
+	repeated string DynamicFlags = 14;
+	optional string Reaction = 15;
 }
 
 message Vec3 {
@@ -69,15 +72,28 @@ message AutoLootRequest {
 	required uint64 targetGuid = 1;
 }
 
+message SetFacingRequest {
+	required float angle = 1;
+}
+
+message LogRequest {
+	required string msg = 1;
+}
+
 service GameService {
     rpc GetPlayerGuid(Empty) returns (PlayerGuid) {}
     rpc GetSpellbook(Empty) returns (Spellbook) {}
     rpc GetVisibleObjects(Empty) returns (GameObjects) {}
 	rpc MoveTo(Vec3) returns (Empty) {}
 	rpc StopMovement(Empty) returns (Empty) {}
+	rpc SetFacing(SetFacingRequest) returns (Empty) {}
+	rpc FaceTarget(Empty) returns (Empty) {}
+	rpc FacePosition(Vec3) returns (Empty) {}
 	rpc SetTarget(SetTargetRequest) returns (Empty) {}
 	rpc Jump(Empty) returns (Empty) {}
+	rpc Sit(Empty) returns (Empty) {}
 	rpc ToggleAttack(ToggleAttackRequest) returns (Empty) {}
 	rpc CastSpellByName(CastSpellByNameRequest) returns (Empty) {}
 	rpc AutoLoot(AutoLootRequest) returns (Empty) {}
+	rpc Log(LogRequest) returns (Empty) {}
 }

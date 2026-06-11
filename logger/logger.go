@@ -31,7 +31,7 @@ func (l *Logger) Log(s string) {
 
 func GetLogger() *Logger {
 	if logger == nil {
-		logFile, _ := os.OpenFile("C:\\superbot\\log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		logFile, _ := os.OpenFile("C:\\metabot\\log.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		logger = &Logger{logBuffer: "", logFile: logFile}
 	}
 	return logger

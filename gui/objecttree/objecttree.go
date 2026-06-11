@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"superbot/game"
-	"superbot/logger"
+	"metabot/game"
+	"metabot/logger"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"

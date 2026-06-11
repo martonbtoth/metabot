@@ -1,4 +1,4 @@
-Superbot
+Metabot
 ========
 
 Vanilla WoW bot framework, exclusively for 1.12.1 build 5875.
@@ -25,5 +25,5 @@ go build .
 dll:
 ```
 cd cmd/dll
-go build -o superbot.dll -buildmode=c-shared
+go build -o metabot.dll -buildmode=c-shared
 ```

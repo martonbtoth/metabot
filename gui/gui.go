@@ -2,10 +2,11 @@ package gui
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
-	"superbot/game"
-	"superbot/logger"
+	"metabot/game"
+	"metabot/logger"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -31,7 +32,13 @@ type gui struct {
 func (g *gui) Run() {
 	logger.GetLogger().AddListener(
 		func(logBuffer string, s string) {
-			g.terminal.SetText(logBuffer)
+			split := strings.Split(logBuffer, "\n")
+			splitLength := len(split) - 40
+			if splitLength > 0 {
+				split = split[splitLength:]
+			}
+			joined := strings.Join(split, "\n")
+			g.terminal.SetText(joined)
 			g.scroll.ScrollToBottom()
 		},
 	)

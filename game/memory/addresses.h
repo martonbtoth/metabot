@@ -22,6 +22,8 @@ const int UNIT_FLAGS_OFFSET = 0xB8;
 const int BUFFS_BASE_OFFSET = 0xBC;
 const int DEBUFFS_BASE_OFFSET = 0x13C;
 const int LEVEL_OFFSET = 0x88;
+const int DYNAMIC_FLAGS_OFFSET = 0x23C;
+
 const int CURRENT_SPELLCAST_OFFSET = 0xC8C;
 const int POS_X_OFFSET = 0x9B8;
 const int POS_Y_OFFSET = 0x9BC;

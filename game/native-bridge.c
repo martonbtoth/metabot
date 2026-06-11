@@ -47,7 +47,7 @@ int32_t getIntFromDescriptorOffset(uint64_t guid, int offset) {
 
 uint64_t getGuidFromDescriptorOffset(uint64_t guid, int offset) {
     int descriptor = getDescriptorPtr(guid);
-    int value = *(uint64_t*)(descriptor + offset);
+    uint64_t value = *(uint64_t*)(descriptor + offset);
     return value;
 }
 
@@ -81,6 +81,10 @@ int32_t GetCurrentEnergy(uint64_t guid) {
 
 int32_t GetLevel(uint64_t guid) {
     return getIntFromDescriptorOffset(guid, LEVEL_OFFSET);
+}
+
+uint32_t GetDynamicFlags(uint64_t guid) {
+    return getIntFromDescriptorOffset(guid, DYNAMIC_FLAGS_OFFSET);
 }
 
 int32_t GetCurrentSpellCastId(uint64_t guid) {
@@ -148,9 +152,20 @@ void StopMovement() {
     clickToMoveInternal(0.f, 0.f, 0.f, CTM_TYPE_NONE);
 }
 
+void SetFacing(uint32_t playerPtr, float angle) {
+    SetFacingNative(playerPtr + 0x9A8, angle);
+    SendMovementUpdateNative(playerPtr, 0x00BE1E2C, 0xDA, 0, 0);
+}
+
+uint32_t GetUnitReaction(uint64_t guid, uint64_t towardsUnitGuid) {
+    int unitPtr = GetObjectPtr(guid);
+    int towardsUnitPointer = GetObjectPtr(towardsUnitGuid);
+    return GetUnitReactionNative(unitPtr, towardsUnitPointer);
+}
+
 void LuaCall(char* code) {
     void luaCalInternal() { // ignore this error: https://github.com/microsoft/vscode-cpptools/issues/1035
-        LuaCallNative(code, "Superbot");
+        LuaCallNative(code, "Metabot");
         return;
     }
     RunOnMainThread(luaCalInternal);
@@ -171,7 +186,7 @@ void SetTarget(uint64_t guid) {
 __fastcall void (*SignalEventOriginal)(uint32_t) = 0;
 
 void Log(char* log) {
-    FILE* file = fopen("C:\\superbot\\native.log", "ab");
+    FILE* file = fopen("C:\\metabot\\native.log", "ab");
     fprintf(file, "%s\n", log);
     fclose(file);
 }

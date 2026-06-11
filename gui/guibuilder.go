@@ -2,8 +2,8 @@ package gui
 
 import (
 	"fmt"
-	"superbot/gui/objecttree"
-	"superbot/logger"
+	"metabot/gui/objecttree"
+	"metabot/logger"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -16,7 +16,7 @@ import (
 func luaPage(gui *gui) *fyne.Container {
 	luaTextField := widget.NewEntry()
 	luaTextField.MultiLine = true
-	luaTextField.Text = "DefaultServerLogin(\"totlol\", \"a\")\nCharacterSelect_SelectCharacter(1)\nEnterWorld()"
+	luaTextField.Text = "DefaultServerLogin(\"demo\", \"a\")\nCharacterSelect_SelectCharacter(1)\nEnterWorld()"
 	runLuaButton := widget.NewButton("Run", func() {
 		lua := luaTextField.Text
 		results := gui.g.RunLuaWithResults(lua)
@@ -69,7 +69,7 @@ func coolButtonsPage(gui *gui) *fyne.Container {
 func buildGui(gui *gui) {
 	a := app.New()
 	a.Settings().SetTheme(theme.DarkTheme())
-	gui.window = a.NewWindow("Superbot")
+	gui.window = a.NewWindow("Metabot 🤖")
 	gui.window.Resize(fyne.NewSize(800, 400))
 
 	gui.tabs = container.NewAppTabs()

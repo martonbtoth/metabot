@@ -10,9 +10,9 @@ import (
 	_ "embed"
 	"fmt"
 	"math/rand"
+	"metabot/logger"
 	"slices"
 	"strings"
-	"superbot/logger"
 	"unsafe"
 )
 
@@ -36,6 +36,10 @@ type Game interface {
 	GetVisibleObjectByGuid(guid uint64) *WowObject
 	MoveToPosition(position Vec3)
 	StopMovement()
+	SetFacing(angle float32)
+	FaceTarget()
+	FacePosition(pos Vec3)
+	Sit()
 	SetTarget(guid uint64)
 	RunLua(lua string)
 	RunLuaWithResults(lua string) []string
@@ -125,14 +129,16 @@ func (g *game) EnumerateVisibleObjectsCallback(filter int, guid uint64) {
 		Rage:               g.getCurrentRage(objectType, guid),
 		Energy:             g.getCurrentEnergy(objectType, guid),
 		CurrentSpellcastId: g.getCurrentSpellCastId(objectType, guid),
+		DynamicFlags:       g.getDynamicFlags(objectType, guid),
+		Reaction:           g.getReaction(objectType, guid),
 	})
 }
 
 func (g *game) getName(objectType uint8, guid uint64) string {
 	name := "N/A"
-	if objectType == Unit {
+	if objectType == UnitType_Unit {
 		name = C.GoString(C.GetUnitName(C.uint64_t(guid)))
-	} else if objectType == Player {
+	} else if objectType == UnitType_Player {
 		name = C.GoString(C.GetPlayerName(C.uint64_t(guid)))
 	}
 	return name
@@ -140,9 +146,9 @@ func (g *game) getName(objectType uint8, guid uint64) string {
 
 func (g *game) getCurrentHealth(objectType uint8, guid uint64) int32 {
 	currentHealth := 0
-	if objectType == Unit {
+	if objectType == UnitType_Unit {
 		currentHealth = int(C.GetCurrentHealth(C.uint64_t(guid)))
-	} else if objectType == Player {
+	} else if objectType == UnitType_Player {
 		currentHealth = int(C.GetCurrentHealth(C.uint64_t(guid)))
 	}
 	return int32(currentHealth)
@@ -150,9 +156,9 @@ func (g *game) getCurrentHealth(objectType uint8, guid uint64) int32 {
 
 func (g *game) getMaxHealth(objectType uint8, guid uint64) int32 {
 	currentHealth := 0
-	if objectType == Unit {
+	if objectType == UnitType_Unit {
 		currentHealth = int(C.GetMaxHealth(C.uint64_t(guid)))
-	} else if objectType == Player {
+	} else if objectType == UnitType_Player {
 		currentHealth = int(C.GetMaxHealth(C.uint64_t(guid)))
 	}
 	return int32(currentHealth)
@@ -160,7 +166,7 @@ func (g *game) getMaxHealth(objectType uint8, guid uint64) int32 {
 
 func (g *game) getTargetGuid(objectType uint8, guid uint64) uint64 {
 	targetGuid := uint64(0)
-	if objectType == Unit || objectType == Player {
+	if objectType == UnitType_Unit || objectType == UnitType_Player {
 		targetGuid = uint64(C.GetTargetGuid(C.uint64_t(guid)))
 	}
 	return targetGuid
@@ -168,7 +174,7 @@ func (g *game) getTargetGuid(objectType uint8, guid uint64) uint64 {
 
 func (g *game) getCurrentMana(objectType uint8, guid uint64) int32 {
 	currentMana := int32(0)
-	if objectType == Unit || objectType == Player {
+	if objectType == UnitType_Unit || objectType == UnitType_Player {
 		currentMana = int32(C.GetCurrentMana(C.uint64_t(guid)))
 	}
 	return currentMana
@@ -176,7 +182,7 @@ func (g *game) getCurrentMana(objectType uint8, guid uint64) int32 {
 
 func (g *game) getMaxMana(objectType uint8, guid uint64) int32 {
 	currentMana := int32(0)
-	if objectType == Unit || objectType == Player {
+	if objectType == UnitType_Unit || objectType == UnitType_Player {
 		currentMana = int32(C.GetMaxMana(C.uint64_t(guid)))
 	}
 	return currentMana
@@ -184,7 +190,7 @@ func (g *game) getMaxMana(objectType uint8, guid uint64) int32 {
 
 func (g *game) getCurrentRage(objectType uint8, guid uint64) int32 {
 	currentRage := int32(0)
-	if objectType == Unit || objectType == Player {
+	if objectType == UnitType_Unit || objectType == UnitType_Player {
 		currentRage = int32(C.GetCurrentRage(C.uint64_t(guid)))
 	}
 	return currentRage
@@ -192,7 +198,7 @@ func (g *game) getCurrentRage(objectType uint8, guid uint64) int32 {
 
 func (g *game) getCurrentEnergy(objectType uint8, guid uint64) int32 {
 	currentEnergy := int32(0)
-	if objectType == Unit || objectType == Player {
+	if objectType == UnitType_Unit || objectType == UnitType_Player {
 		currentEnergy = int32(C.GetCurrentEnergy(C.uint64_t(guid)))
 	}
 	return currentEnergy
@@ -200,7 +206,7 @@ func (g *game) getCurrentEnergy(objectType uint8, guid uint64) int32 {
 
 func (g *game) getCurrentSpellCastId(objectType uint8, guid uint64) int32 {
 	currentSpellCastId := int32(0)
-	if objectType == Unit || objectType == Player {
+	if objectType == UnitType_Unit || objectType == UnitType_Player {
 		currentSpellCastId = int32(C.GetCurrentSpellCastId(C.uint64_t(guid)))
 	}
 	return currentSpellCastId
@@ -208,10 +214,59 @@ func (g *game) getCurrentSpellCastId(objectType uint8, guid uint64) int32 {
 
 func (g *game) getLevel(objectType uint8, guid uint64) int32 {
 	level := int32(0)
-	if objectType == Unit || objectType == Player {
+	if objectType == UnitType_Unit || objectType == UnitType_Player {
 		level = int32(C.GetLevel(C.uint64_t(guid)))
 	}
 	return level
+}
+
+func (g *game) getDynamicFlags(objectType uint8, guid uint64) []string {
+	dynamicFlags := []string{}
+	if objectType == UnitType_Unit || objectType == UnitType_Player {
+		flags := uint32(C.GetDynamicFlags(C.uint64_t(guid)))
+		if HasFlag(flags, DynamicFlag_CanBeLooted) {
+			dynamicFlags = append(dynamicFlags, "CAN_BE_LOOTED")
+		}
+		if HasFlag(flags, DynamicFlag_Tapped) {
+			dynamicFlags = append(dynamicFlags, "TAPPED")
+		}
+		if HasFlag(flags, DynamicFlag_TappedByMe) {
+			dynamicFlags = append(dynamicFlags, "TAPPED_BY_ME")
+		}
+		if HasFlag(flags, DynamicFlag_IsMarked) {
+			dynamicFlags = append(dynamicFlags, "MARKED")
+		}
+	}
+	return dynamicFlags
+}
+
+func (g *game) getReaction(objectType uint8, guid uint64) string {
+	if objectType == UnitType_Unit || objectType == UnitType_Player {
+		reactionId := int(C.GetUnitReaction(C.uint64_t(g.GetPlayerGuid()), C.uint64_t(guid)))
+		switch reactionId {
+		case UnitReaction_Exalted:
+			return "EXALTED"
+		case UnitReaction_Hated:
+			return "HATED"
+		case UnitReaction_Hostile:
+			return "HOSTILE"
+		case UnitReaction_Unfriendly:
+			return "UNFRIENDLY"
+		case UnitReaction_Neutral:
+			return "NEUTRAL"
+		case UnitReaction_Friendly:
+			return "FRIENDLY"
+		case UnitReaction_Honored:
+			return "HONORED"
+		case UnitReaction_Revered:
+			return "REVERED"
+		}
+	}
+	return ""
+}
+
+func (g *game) Sit() {
+	g.RunLua("DoEmote('SIT')")
 }
 
 func (g *game) GetVisibleObjects() []WowObject {
@@ -225,19 +280,45 @@ func (g *game) GetVisibleObjectByGuid(guid uint64) *WowObject {
 }
 
 func (g *game) MoveToPosition(position Vec3) {
-	logger.Log(fmt.Sprintf("Moving to position %v", position))
+	// logger.Log(fmt.Sprintf("Moving to position %v", position))
 
 	C.ClickToMove(C.float(position.X), C.float(position.Y), C.float(position.Z))
 }
 
 func (g *game) StopMovement() {
-	logger.Log("Stopping movement")
-
 	C.StopMovement()
 }
 
+func (g *game) SetFacing(angle float32) {
+	playerGuid := g.GetPlayerGuid()
+	playerPtr := uintptr(C.GetObjectPtr(C.uint64_t(playerGuid)))
+	C.SetFacing(C.uint32_t(playerPtr), C.float(angle))
+}
+
+func (g *game) FaceTarget() {
+	g.EnumerateVisibleObjects()
+	playerGuid := g.GetPlayerGuid()
+	player := g.GetVisibleObjectByGuid(playerGuid)
+	targetGuid := player.TargetGuid
+	if targetGuid == 0 {
+		logger.Log("No target to face")
+		return
+	}
+	target := g.GetVisibleObjectByGuid(player.TargetGuid)
+	facing := player.Position.AngleTo(target.Position)
+	g.SetFacing(facing)
+}
+
+func (g *game) FacePosition(pos Vec3) {
+	g.EnumerateVisibleObjects()
+	playerGuid := g.GetPlayerGuid()
+	player := g.GetVisibleObjectByGuid(playerGuid)
+	facing := player.Position.AngleTo(pos)
+	g.SetFacing(facing)
+}
+
 func (g *game) SetTarget(guid uint64) {
-	logger.Log(fmt.Sprintf("Setting target to %v", guid))
+	// logger.Log(fmt.Sprintf("Setting target to %v", guid))
 	C.SetTarget(C.uint64_t(guid))
 }
 

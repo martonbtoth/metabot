@@ -21,16 +21,25 @@ ClickToMoveNative_t ClickToMoveNative = 0x00611130;
 typedef void __fastcall (*LuaCallNative_t)(char* code, const char* unused);
 LuaCallNative_t LuaCallNative = 0x00704CD0;
 
-typedef __stdcall (*SetTargetNative_t)(uint64_t guid);
+typedef void __stdcall (*SetTargetNative_t)(uint64_t guid);
 SetTargetNative_t SetTargetNative = 0x00493540;
 
 typedef char* __fastcall (*GetTextNative_t)(char* varName, unsigned int nonSense, int zero);
-GetTextNative_t GetTextNative = 0x00703BF0;
+GetTextNative_t GetTextNative = (char *(__fastcall *)(char *varName, unsigned int nonSense, int zero)) 0x00703BF0;
 
 typedef void __fastcall (*LootSlotNative_t)(uint32_t slot, int32_t unused);
-LootSlotNative_t LootSlotNative = 0x004C2790;
+LootSlotNative_t LootSlotNative = (void (__fastcall *)(uint32_t slot, int32_t unused)) 0x004C2790;
 
 typedef void __thiscall (*RightClickNative_t)(uint32_t unitPtr, int32_t autoLoot);
-RightClickNative_t RightClickNative = 0x60BEA0;
+RightClickNative_t RightClickNative = (void (*)(uint32_t unitPtr, int32_t autoLoot)) 0x60BEA0;
+
+typedef void __thiscall (*SetFacingNative_t)(uint32_t playerSetFacingPtr, float angle);
+SetFacingNative_t SetFacingNative = (void (*)(uint32_t playerSetFacingPtr, float angle)) 0x007C6F30;
+
+typedef void __thiscall (*SendMovementUpdateNative_t)(uint32_t playerPtr, uint32_t unknown, uint32_t opcode, uint32_t unknown2, uint32_t unknown3);
+SendMovementUpdateNative_t SendMovementUpdateNative = (void (*)(uint32_t playerPtr, uint32_t unknown, uint32_t opcode, uint32_t unknown2, uint32_t unknown3)) 0x00600A30;
+
+typedef uint32_t __thiscall (*GetUnitReactionNative_t)(int unitPtr, int towardsUnitPointer);
+GetUnitReactionNative_t GetUnitReactionNative = (uint32_t (*)(int unitPtr, int towardsUnitPointer)) 0x006061E0;
 
 #endif

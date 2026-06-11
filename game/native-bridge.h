@@ -15,12 +15,15 @@ int32_t GetMaxMana(uint64_t guid);
 int32_t GetCurrentRage(uint64_t guid);
 int32_t GetCurrentEnergy(uint64_t guid);
 int32_t GetCurrentSpellCastId(uint64_t guid);
+uint32_t GetDynamicFlags(uint64_t guid);
+uint32_t GetUnitReaction(uint64_t guid, uint64_t towardsUnitGuid);
 
 float GetObjectPositionX(uint64_t guid);
 float GetObjectPositionY(uint64_t guid);
 float GetObjectPositionZ(uint64_t guid);
 void ClickToMove(float x, float y, float z);
 void StopMovement();
+void SetFacing(uint32_t playerPtr, float angle);
 void SetTarget(uint64_t guid);
 void RightClick(int32_t unitPtr, int32_t autoLoot);
 

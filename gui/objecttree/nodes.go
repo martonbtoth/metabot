@@ -3,7 +3,7 @@ package objecttree
 import (
 	"fmt"
 
-	"superbot/game"
+	"metabot/game"
 
 	"fyne.io/fyne/v2/widget"
 )

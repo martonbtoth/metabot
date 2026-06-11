@@ -3,9 +3,9 @@ package server
 import (
 	context "context"
 	"fmt"
+	"metabot/game"
+	"metabot/logger"
 	"net"
-	"superbot/game"
-	"superbot/logger"
 
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -59,26 +59,29 @@ func wowObjectToGameObject(wowObject game.WowObject) *GameObject {
 		CurrentHealth: &wowObject.CurrentHealth,
 		MaxMana:       &wowObject.MaxMana,
 		CurrentMana:   &wowObject.CurrentMana,
+		TargetGuid:    &wowObject.TargetGuid,
+		DynamicFlags:  wowObject.DynamicFlags,
+		Reaction:      &wowObject.Reaction,
 	}
 }
 
 func wowUnitTypeToUnitType(wowUnitType uint8) UnitType {
 	switch wowUnitType {
-	case game.None:
+	case game.UnitType_None:
 		return UnitType_None
-	case game.Item:
+	case game.UnitType_Item:
 		return UnitType_Item
-	case game.Container:
+	case game.UnitType_Container:
 		return UnitType_Container
-	case game.Unit:
+	case game.UnitType_Unit:
 		return UnitType_Unit
-	case game.Player:
+	case game.UnitType_Player:
 		return UnitType_Player
-	case game.GameObject:
+	case game.UnitType_GameObject:
 		return UnitType_Object
-	case game.DynamicObject:
+	case game.UnitType_DynamicObject:
 		return UnitType_DynamicObject
-	case game.Corpse:
+	case game.UnitType_Corpse:
 		return UnitType_Corpse
 	}
 	return UnitType_None
@@ -89,8 +92,33 @@ func (gs *gameServer) MoveTo(ctx context.Context, pos *Vec3) (*Empty, error) {
 	return &Empty{}, nil
 }
 
+func (gs *gameServer) StopMovement(context.Context, *Empty) (*Empty, error) {
+	gs.game.StopMovement()
+	return &Empty{}, nil
+}
+
+func (gs *gameServer) SetFacing(ctx context.Context, request *SetFacingRequest) (*Empty, error) {
+	gs.game.SetFacing(*request.Angle)
+	return &Empty{}, nil
+}
+
+func (gs *gameServer) FaceTarget(context.Context, *Empty) (*Empty, error) {
+	gs.game.FaceTarget()
+	return &Empty{}, nil
+}
+
+func (gs *gameServer) FacePosition(ctx context.Context, pos *Vec3) (*Empty, error) {
+	gs.game.FacePosition(game.Vec3{X: *pos.X, Y: *pos.Y, Z: *pos.Z})
+	return &Empty{}, nil
+}
+
 func (gs *gameServer) Jump(context.Context, *Empty) (*Empty, error) {
 	gs.game.Jump()
+	return &Empty{}, nil
+}
+
+func (gs *gameServer) Sit(context.Context, *Empty) (*Empty, error) {
+	gs.game.Sit()
 	return &Empty{}, nil
 }
 
@@ -109,13 +137,13 @@ func (gs *gameServer) SetTarget(ctx context.Context, request *SetTargetRequest) 
 	return &Empty{}, nil
 }
 
-func (gs *gameServer) StopMovement(context.Context, *Empty) (*Empty, error) {
-	gs.game.StopMovement()
+func (gs *gameServer) AutoLoot(ctx context.Context, request *AutoLootRequest) (*Empty, error) {
+	gs.game.AutoLoot(*request.TargetGuid)
 	return &Empty{}, nil
 }
 
-func (gs *gameServer) AutoLoot(ctx context.Context, request *AutoLootRequest) (*Empty, error) {
-	gs.game.AutoLoot(*request.TargetGuid)
+func (gs *gameServer) Log(ctx context.Context, request *LogRequest) (*Empty, error) {
+	logger.Log(*request.Msg)
 	return &Empty{}, nil
 }
 

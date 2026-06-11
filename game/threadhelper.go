@@ -8,7 +8,7 @@ import "C"
 
 import (
 	"fmt"
-	"superbot/logger"
+	"metabot/logger"
 	"syscall"
 	"unsafe"
 

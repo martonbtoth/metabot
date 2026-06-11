@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "native-bridge.h": "c"
+        "native-bridge.h": "c",
+        "stdio.h": "c"
     }
 }

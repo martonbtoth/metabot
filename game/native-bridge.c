@@ -16,6 +16,7 @@ const int CLICK_TO_MOVE_FUN_PTR = 0x00611130;
 const int CLICK_TO_MOVE_FIX_PTR = 0x860A90;
 const int LUA_CALL_FUN_PTR = 0x00704CD0;
 const int GET_TEXT_FUN_PTR = 0x00703BF0;
+const int SET_TARGET_FUN_PTR = 0x00493540;
 const uint32_t UNIT_NAME_OFFSET = 0xB30;
 const int* NAME_LIST_POINTER = 0xC0E230;
 const int NAME_PTR_GUID_OFFSET = 0xC;
@@ -189,4 +190,14 @@ char* GetText(char* varName) {
     typedef char* __fastcall func(char* varName, unsigned int nonSense, int zero);
     func* f = (func*)GET_TEXT_FUN_PTR;
     return f(varName, 0xFFFFFFFF, 0);
+}
+
+void SetTarget(uint64_t guid) {
+    void setTargetInternal() { // ignore this error: https://github.com/microsoft/vscode-cpptools/issues/1035
+        typedef __stdcall func(uint64_t guid);
+        func* f = (func*)SET_TARGET_FUN_PTR;
+        f(guid);
+        return;
+    }
+    RunOnMainThread(setTargetInternal);
 }

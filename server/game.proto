@@ -60,11 +60,16 @@ message ToggleAttackRequest {
 	required bool attack = 1;
 }
 
+message SetTargetRequest {
+	required uint64 targetGuid = 1;
+}
+
 service GameService {
     rpc GetPlayerGuid(Empty) returns (PlayerGuid) {}
     rpc GetSpellbook(Empty) returns (Spellbook) {}
     rpc GetVisibleObjects(Empty) returns (GameObjects) {}
 	rpc MoveTo(Vec3) returns (Empty) {}
+	rpc SetTarget(SetTargetRequest) returns (Empty) {}
 	rpc Jump(Empty) returns (Empty) {}
 	rpc ToggleAttack(ToggleAttackRequest) returns (Empty) {}
 	rpc CastSpellByName(CastSpellByNameRequest) returns (Empty) {}

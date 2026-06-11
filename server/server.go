@@ -103,6 +103,11 @@ func (gs *gameServer) CastSpellByName(ctx context.Context, request *CastSpellByN
 	return &Empty{}, nil
 }
 
+func (gs *gameServer) SetTarget(ctx context.Context, request *SetTargetRequest) (*Empty, error) {
+	gs.game.SetTarget(*request.TargetGuid)
+	return &Empty{}, nil
+}
+
 func newServer(game game.Game) *gameServer {
 	return &gameServer{game: game}
 }

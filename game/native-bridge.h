@@ -9,6 +9,7 @@ char* GetUnitName(uint64_t guid);
 char* GetPlayerName(uint64_t guid);
 uint64_t GetTargetGuid(uint64_t guid);
 
+int32_t GetLevel(uint64_t guid);
 int32_t GetCurrentMana(uint64_t guid);
 int32_t GetMaxMana(uint64_t guid);
 int32_t GetCurrentRage(uint64_t guid);
@@ -24,3 +25,5 @@ void SetTarget(uint64_t guid);
 
 void LuaCall(char* code);
 char* GetText(char* varName);
+
+void HookEvents();

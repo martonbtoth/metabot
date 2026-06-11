@@ -2,6 +2,7 @@ package game
 
 /*
 #include "native-bridge.h"
+#cgo LDFLAGS: -L${SRCDIR}/minhook/ -l:libMinHook.a
 */
 import "C"
 
@@ -113,6 +114,7 @@ func (g *game) EnumerateVisibleObjectsCallback(filter int, guid uint64) {
 		Pointer:            objectUintPtr,
 		Type:               objectType,
 		Name:               g.getName(objectType, guid),
+		Level:              g.getLevel(objectType, guid),
 		MaxHealth:          g.getMaxHealth(objectType, guid),
 		CurrentHealth:      g.getCurrentHealth(objectType, guid),
 		Position:           position,
@@ -203,6 +205,14 @@ func (g *game) getCurrentSpellCastId(objectType uint8, guid uint64) int32 {
 	return currentSpellCastId
 }
 
+func (g *game) getLevel(objectType uint8, guid uint64) int32 {
+	level := int32(0)
+	if objectType == Unit || objectType == Player {
+		level = int32(C.GetLevel(C.uint64_t(guid)))
+	}
+	return level
+}
+
 func (g *game) GetVisibleObjects() []WowObject {
 	return g.objects
 }
@@ -289,4 +299,8 @@ func randStringRunes(n int) string {
 //export EnumerateVisibleObjectsCallback
 func EnumerateVisibleObjectsCallback(filter int, guid uint64) {
 	globalGame.EnumerateVisibleObjectsCallback(filter, guid)
+}
+
+func HookEvents() {
+	C.HookEvents()
 }

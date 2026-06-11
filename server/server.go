@@ -46,9 +46,10 @@ func (gs *gameServer) GetVisibleObjects(context.Context, *Empty) (*GameObjects, 
 func wowObjectToGameObject(wowObject game.WowObject) *GameObject {
 	unitType := wowUnitTypeToUnitType(wowObject.Type)
 	return &GameObject{
-		Guid: &wowObject.Guid,
-		Name: &wowObject.Name,
-		Type: &unitType,
+		Guid:  &wowObject.Guid,
+		Name:  &wowObject.Name,
+		Level: &wowObject.Level,
+		Type:  &unitType,
 		Position: &Vec3{
 			X: &wowObject.Position.X,
 			Y: &wowObject.Position.Y,

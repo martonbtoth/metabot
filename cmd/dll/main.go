@@ -7,9 +7,10 @@ import (
 )
 
 func init() {
-	game := game.GetGame()
-	gui := gui.NewGui(game)
-	server.Listen(game)
+	g := game.GetGame()
+	game.HookEvents()
+	gui := gui.NewGui(g)
+	server.Listen(g)
 	gui.Run()
 }
 

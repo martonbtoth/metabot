@@ -27,15 +27,16 @@ message GameObject {
     required uint64 Guid = 1;
 	required UnitType Type = 2;
 	optional string Name = 3;
-	optional int32 MaxHealth = 4;
-	optional int32 CurrentHealth = 5;
-	optional Vec3 Position = 6;
-	optional uint64 TargetGuid = 7;
-	optional int32 CurrentMana = 8;
-	optional int32 MaxMana = 9;
-	optional int32 Rage = 10;
-	optional int32 Energy = 11;
-	optional int32 CurrentSpellcastId = 12;
+	optional int32 Level = 4;
+	optional int32 MaxHealth = 5;
+	optional int32 CurrentHealth = 6;
+	optional Vec3 Position = 7;
+	optional uint64 TargetGuid = 8;
+	optional int32 CurrentMana = 9;
+	optional int32 MaxMana = 10;
+	optional int32 Rage = 11;
+	optional int32 Energy = 12;
+	optional int32 CurrentSpellcastId = 13;
 }
 
 message Vec3 {

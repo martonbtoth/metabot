@@ -1,59 +1,14 @@
-#ifndef _NATIVE_BRIDGE_H
-#define _NATIVE_BRIDGE_H
-
 #include "native-bridge.h"
 #include "threadhelper.h"
+#include "memory/ctmtypes.h"
+#include "memory/addresses.h"
+#include "memory/nativefunctions.h"
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <windows.h>
 
-#endif
-
-const int GET_PLAYER_GUID_FUN_PTR = 0x00468550;
-const int ENUMERATE_VISIBLE_OBJECTS_FUN_PTR = 0x00468380;
-const int GET_OBJECT_PTR_FUN_PTR = 0x00464870;
-const int CLICK_TO_MOVE_FUN_PTR = 0x00611130;
-const int CLICK_TO_MOVE_FIX_PTR = 0x860A90;
-const int LUA_CALL_FUN_PTR = 0x00704CD0;
-const int GET_TEXT_FUN_PTR = 0x00703BF0;
-const int SET_TARGET_FUN_PTR = 0x00493540;
-const uint32_t UNIT_NAME_OFFSET = 0xB30;
-const int* NAME_LIST_POINTER = 0xC0E230;
-const int NAME_PTR_GUID_OFFSET = 0xC;
-const int NAME_PTR_NAME_OFFSET = 0x14;
-const int DESCRIPTOR_OFFSET = 0x8;
-const int CURRENT_HEALTH_OFFSET = 0x58;
-const int MAX_HEALTH_OFFSET = 0x70;
-const int CURRENT_MANA_OFFSET = 0x5C;
-const int MAX_MANA_OFFSET = 0x74;
-const int TARGET_GUID_OFFSET = 0x40;
-const int RAGE_OFFSET = 0x60;
-const int ENERGY_OFFSET = 0x68;
-const int FACTION_ID_OFFSET = 0x8C;
-const int UNIT_FLAGS_OFFSET = 0xB8;
-const int BUFFS_BASE_OFFSET = 0xBC;
-const int DEBUFFS_BASE_OFFSET = 0x13C;
-const int LEVEL_OFFSET = 0x88;
-const int CURRENT_SPELLCAST_OFFSET = 0xC8C;
-const int POS_X_OFFSET = 0x9B8;
-const int POS_Y_OFFSET = 0x9BC;
-const int POS_Z_OFFSET = 0x9C0;
-
-const uint32_t CTM_TYPE_FACE_TARGET = 0x1;
-const uint32_t CTM_TYPE_FACE = 0x2;
-const uint32_t CTM_TYPE_STOP_THROWS_EXCEPTION = 0x3;
-const uint32_t CTM_TYPE_MOVE = 0x4;
-const uint32_t CTM_TYPE_NPC_INTERACT = 0x5;
-const uint32_t CTM_TYPE_LOOT = 0x6;
-const uint32_t CTM_TYPE_OBJ_INTERACT = 0x7;
-const uint32_t CTM_TYPE_FACE_OTHER = 0x8;
-const uint32_t CTM_TYPE_SKIN = 0x9;
-const uint32_t CTM_TYPE_ATTACK_POSITION = 0xA;
-const uint32_t CTM_TYPE_ATTACK_GUID = 0xB;
-const uint32_t CTM_TYPE_CONSTANT_FACE = 0xC;
-const uint32_t CTM_TYPE_NONE = 0xD;
-const uint32_t CTM_TYPE_ATTACK = 0x10;
-const uint32_t CTM_TYPE_IDLE = 0xC;
+#include "minhook/MinHook.h"
 
 extern int EnumerateVisibleObjectsCallback(int filter, uint64_t guid);
 extern int WndProcGoCallback(int* hWnd, int Msg, int wParam, int lParam);
@@ -65,12 +20,10 @@ typedef struct {
 } vec3;
 
 uint64_t GetPlayerGuid() {
-    uint64_t (*GetPlayerGuidNative)(void) = (uint64_t (*)(void))GET_PLAYER_GUID_FUN_PTR;
     return GetPlayerGuidNative();
 }
 
 int GetObjectPtr(uint64_t guid) {
-    __stdcall int* (*GetObjectPtrNative)(uint64_t) = (__stdcall int* (*)(uint64_t))GET_OBJECT_PTR_FUN_PTR;
     return (int) GetObjectPtrNative(guid);
 }
 
@@ -86,46 +39,48 @@ int* getDescriptorPtr(uint64_t guid) {
     return *(int*)(objectptr + DESCRIPTOR_OFFSET);
 }
 
-int GetCurrentHealth(uint64_t guid) {
+int32_t getIntFromDescriptorOffset(uint64_t guid, int offset) {
     int descriptor = getDescriptorPtr(guid);
-    int value = *(int*)(descriptor + CURRENT_HEALTH_OFFSET);
+    int value = *(int32_t*)(descriptor + offset);
     return value;
+}
+
+uint64_t getGuidFromDescriptorOffset(uint64_t guid, int offset) {
+    int descriptor = getDescriptorPtr(guid);
+    int value = *(uint64_t*)(descriptor + offset);
+    return value;
+}
+
+int GetCurrentHealth(uint64_t guid) {
+    return getIntFromDescriptorOffset(guid, CURRENT_HEALTH_OFFSET);
 }
 
 int GetMaxHealth(uint64_t guid) {
-    int descriptor = getDescriptorPtr(guid);
-    int value = *(int*)(descriptor + MAX_HEALTH_OFFSET);
-    return value;
+    return getIntFromDescriptorOffset(guid, MAX_HEALTH_OFFSET);
 }
 
 uint64_t GetTargetGuid(uint64_t guid) {
-    int descriptor = getDescriptorPtr(guid);
-    uint64_t value = *(uint64_t*)(descriptor + TARGET_GUID_OFFSET);
-    return value;
+    return getGuidFromDescriptorOffset(guid, TARGET_GUID_OFFSET);
 }
 
 int32_t GetCurrentMana(uint64_t guid) {
-    int descriptor = getDescriptorPtr(guid);
-    int32_t value = *(int32_t*)(descriptor + CURRENT_MANA_OFFSET);
-    return value;
+    return getIntFromDescriptorOffset(guid, CURRENT_MANA_OFFSET);
 }
 
 int32_t GetMaxMana(uint64_t guid) {
-    int descriptor = getDescriptorPtr(guid);
-    int value = *(int*)(descriptor + CURRENT_MANA_OFFSET);
-    return value;
+    return getIntFromDescriptorOffset(guid, MAX_MANA_OFFSET);
 }
 
 int32_t GetCurrentRage(uint64_t guid) {
-    int descriptor = getDescriptorPtr(guid);
-    int value = *(int*)(descriptor + RAGE_OFFSET);
-    return value;
+    return getIntFromDescriptorOffset(guid, RAGE_OFFSET);
 }
 
 int32_t GetCurrentEnergy(uint64_t guid) {
-    int descriptor = getDescriptorPtr(guid);
-    int value = *(int*)(descriptor + ENERGY_OFFSET);
-    return value;
+    return getIntFromDescriptorOffset(guid, ENERGY_OFFSET);
+}
+
+int32_t GetLevel(uint64_t guid) {
+    return getIntFromDescriptorOffset(guid, LEVEL_OFFSET);
 }
 
 int32_t GetCurrentSpellCastId(uint64_t guid) {
@@ -149,17 +104,13 @@ char* GetPlayerName(uint64_t guid) {
     return "Player name not found!";
 }
 
-
 __stdcall int EnumerateVisibleObjectsCallbackInternal(uint64_t guid) {
     EnumerateVisibleObjectsCallback(0, guid);
     return 1;
 }
 
 __stdcall int EnumerateVisibleObjects(int filter) {
-        // typedef void __fastcall func(__thiscall int (*callback)(void*, int, uint64_t), int filter);
-        typedef void __fastcall func(__stdcall int (*callback)(uint64_t), int filter);
-        func* enumerateFunction = (func*)ENUMERATE_VISIBLE_OBJECTS_FUN_PTR;
-        enumerateFunction(EnumerateVisibleObjectsCallbackInternal, filter);
+        EnumerateVisibleObjectsNative(EnumerateVisibleObjectsCallbackInternal, filter);
 }
 
 float GetObjectPositionX(uint64_t guid) {
@@ -181,9 +132,6 @@ uint64_t interactGuid = 0;
 
 void clickToMoveInternal(float x, float y, float z, uint32_t ctmType) {
     float destination[3] = {0.0, 0.0, 0.0};
-    // void __thiscall (*ClickToMoveNative)(uintptr_t, int, uint64_t*, vec3*, float) = (void __thiscall(*)(uintptr_t, int, uint64_t, vec3*, float))CLICK_TO_MOVE_FUN_PTR;
-    typedef void (__thiscall* func)(uintptr_t, uint32_t, unsigned long long*, float*, float);
-    func ClickToMoveNative = (func)CLICK_TO_MOVE_FUN_PTR;
     uint64_t playerGuid = GetPlayerGuid();
     int playerPtr = GetObjectPtr(playerGuid);
     destination[0] = x;
@@ -202,26 +150,52 @@ void StopMovement() {
 
 void LuaCall(char* code) {
     void luaCalInternal() { // ignore this error: https://github.com/microsoft/vscode-cpptools/issues/1035
-        typedef void __fastcall func(char* code, const char* unused);
-        func* f = (func*)LUA_CALL_FUN_PTR;
-        f(code, "Superbot");
+        LuaCallNative(code, "Superbot");
         return;
     }
     RunOnMainThread(luaCalInternal);
 }
 
 char* GetText(char* varName) {
-    typedef char* __fastcall func(char* varName, unsigned int nonSense, int zero);
-    func* f = (func*)GET_TEXT_FUN_PTR;
-    return f(varName, 0xFFFFFFFF, 0);
+    return GetTextNative(varName, 0xFFFFFFFF, 0);
 }
 
 void SetTarget(uint64_t guid) {
     void setTargetInternal() { // ignore this error: https://github.com/microsoft/vscode-cpptools/issues/1035
-        typedef __stdcall func(uint64_t guid);
-        func* f = (func*)SET_TARGET_FUN_PTR;
-        f(guid);
+        SetTargetNative(guid);
         return;
     }
     RunOnMainThread(setTargetInternal);
+}
+
+__fastcall void (*SignalEventOriginal)(uint32_t) = 0;
+
+void Log(char* log) {
+    FILE* file = fopen("C:\\superbot\\native.log", "ab");
+    fprintf(file, "%s\n", log);
+    fclose(file);
+}
+
+__fastcall void SignalEventHook(uint32_t event) {
+    char buffer[400];
+    sprintf(buffer, "Event: %x", event);
+    Log(buffer);
+    SignalEventOriginal(event);
+}
+
+void HookEvents() {
+    Log("Hooking events...");
+    if (MH_Initialize() != MH_OK) {
+        Log("Could not initialize MinHook");
+        return;
+    }
+    if (MH_CreateHook(SIGNAL_EVENT_FUN_PTR, SignalEventHook, &SignalEventOriginal) != MH_OK) {
+        Log("Could not create hook for SignalEvent");
+        return;
+    }
+    if (MH_EnableHook(SIGNAL_EVENT_FUN_PTR) != MH_OK) {
+        Log("Could not enable hook for SignalEvent");
+        return;
+    }
+    Log("Hooking events...");
 }

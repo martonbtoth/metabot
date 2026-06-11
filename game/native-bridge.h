@@ -11,5 +11,10 @@ char* GetPlayerName(uint64_t guid);
 float GetObjectPositionX(uint64_t guid);
 float GetObjectPositionY(uint64_t guid);
 float GetObjectPositionZ(uint64_t guid);
-void FixClickToMove();
 void ClickToMove(float x, float y, float z);
+
+void LuaCall(char* code);
+
+int WndProcCallback(int* hWnd, int Msg, int wParam, int lParam);
+void SetOldCallback(int callback);
+int GetWndProcCallbackPtr();

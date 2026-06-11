@@ -29,10 +29,12 @@ type gui struct {
 }
 
 func (g *gui) Run() {
-	logger.GetLogger().Listener = func(logBuffer string) {
-		g.terminal.SetText(logBuffer)
-		g.scroll.ScrollToBottom()
-	}
+	logger.GetLogger().AddListener(
+		func(logBuffer string, s string) {
+			g.terminal.SetText(logBuffer)
+			g.scroll.ScrollToBottom()
+		},
+	)
 
 	go func() {
 		for range time.Tick(300 * time.Millisecond) {

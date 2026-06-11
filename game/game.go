@@ -22,6 +22,7 @@ type Game interface {
 	GetVisibleObjects() []WowObject
 	GetVisibleObjectByGuid(guid uint64) *WowObject
 	MoveToPosition(position Vec3)
+	RunLua(lua string)
 }
 
 type game struct {
@@ -34,7 +35,13 @@ func GetGame() *Game {
 	if globalGame == nil {
 		globalGame = &game{}
 	}
-	C.FixClickToMove()
+	FixClickToMove()
+	UnlockProtectedLuaFunctions()
+	logger.GetLogger().AddListener(func(logBuffer string, s string) {
+		if globalGame.GetPlayerGuid() != 0 {
+			globalGame.RunLua("SendChatMessage('" + s + "')")
+		}
+	})
 	return &globalGame
 }
 
@@ -112,7 +119,13 @@ func (g *game) GetVisibleObjectByGuid(guid uint64) *WowObject {
 
 func (g *game) MoveToPosition(position Vec3) {
 	logger.GetLogger().Log(fmt.Sprintf("Moving to position %v", position))
+
 	C.ClickToMove(C.float(position.X), C.float(position.Y), C.float(position.Z))
+}
+
+func (g *game) RunLua(lua string) {
+	C.LuaCall(C.CString(lua))
+	NotifyMainThread()
 }
 
 //export EnumerateVisibleObjectsCallback

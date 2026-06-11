@@ -29,9 +29,20 @@ func buildGui(gui *gui) {
 	tree := objecttree.NewObjectTree(gui.g)
 	enumerateButtonLayout := container.New(layout.NewCenterLayout(), enumerateObjectsButton)
 	gui.treeContainer = container.New(layout.NewBorderLayout(nil, enumerateButtonLayout, nil, nil), tree, enumerateButtonLayout)
+
+	luaTextField := widget.NewEntry()
+	luaTextField.MultiLine = true
+	luaTextField.Text = "Jump()"
+	runLuaButton := widget.NewButton("Run", func() {
+		lua := luaTextField.Text
+		gui.g.RunLua(lua)
+	})
+	luaContainer := container.New(layout.NewBorderLayout(nil, runLuaButton, nil, nil), luaTextField, runLuaButton)
+
 	gui.tabs = container.NewAppTabs(
 		container.NewTabItem("Terminal", terminalContainer),
 		container.NewTabItem("Objects", gui.treeContainer),
+		container.NewTabItem("Lua shell", luaContainer),
 	)
 
 	gui.tabs.OnSelected = func(ti *container.TabItem) {

@@ -49,6 +49,15 @@ func wowObjectToGameObject(wowObject game.WowObject) *GameObject {
 		Guid: &wowObject.Guid,
 		Name: &wowObject.Name,
 		Type: &unitType,
+		Position: &Vec3{
+			X: &wowObject.Position.X,
+			Y: &wowObject.Position.Y,
+			Z: &wowObject.Position.Z,
+		},
+		MaxHealth:     &wowObject.MaxHealth,
+		CurrentHealth: &wowObject.CurrentHealth,
+		MaxMana:       &wowObject.MaxMana,
+		CurrentMana:   &wowObject.CurrentMana,
 	}
 }
 
@@ -72,6 +81,11 @@ func wowUnitTypeToUnitType(wowUnitType uint8) UnitType {
 		return UnitType_Corpse
 	}
 	return UnitType_None
+}
+
+func (gs *gameServer) MoveTo(ctx context.Context, pos *Vec3) (*Empty, error) {
+	gs.game.MoveToPosition(game.Vec3{X: *pos.X, Y: *pos.Y, Z: *pos.Z})
+	return &Empty{}, nil
 }
 
 func newServer(game game.Game) *gameServer {

@@ -18,8 +18,8 @@ type WowObject struct {
 	Pointer            uintptr
 	Type               uint8
 	Name               string
-	MaxHealth          int
-	CurrentHealth      int
+	MaxHealth          int32
+	CurrentHealth      int32
 	Position           Vec3
 	TargetGuid         uint64
 	CurrentMana        int32

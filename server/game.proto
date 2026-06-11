@@ -56,4 +56,5 @@ service GameService {
     rpc GetPlayerGuid(Empty) returns (PlayerGuid) {}
     rpc GetSpellbook(Empty) returns (Spellbook) {}
     rpc GetVisibleObjects(Empty) returns (GameObjects) {}
+	rpc MoveTo(Vec3) returns (Empty) {}
 }

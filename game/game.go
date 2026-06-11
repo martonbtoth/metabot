@@ -81,7 +81,9 @@ func (g *game) GetPlayerGuid() uint64 {
 
 func (g *game) EnumerateVisibleObjects() {
 	g.objects = []WowObject{}
-	C.EnumerateVisibleObjects(0)
+	if g.GetPlayerGuid() != 0 {
+		C.EnumerateVisibleObjects(0)
+	}
 }
 
 func (g *game) EnumerateVisibleObjectsCallback(filter int, guid uint64) {
@@ -122,24 +124,24 @@ func (g *game) getName(objectType uint8, guid uint64) string {
 	return name
 }
 
-func (g *game) getCurrentHealth(objectType uint8, guid uint64) int {
+func (g *game) getCurrentHealth(objectType uint8, guid uint64) int32 {
 	currentHealth := 0
 	if objectType == Unit {
 		currentHealth = int(C.GetCurrentHealth(C.uint64_t(guid)))
 	} else if objectType == Player {
 		currentHealth = int(C.GetCurrentHealth(C.uint64_t(guid)))
 	}
-	return currentHealth
+	return int32(currentHealth)
 }
 
-func (g *game) getMaxHealth(objectType uint8, guid uint64) int {
+func (g *game) getMaxHealth(objectType uint8, guid uint64) int32 {
 	currentHealth := 0
 	if objectType == Unit {
 		currentHealth = int(C.GetMaxHealth(C.uint64_t(guid)))
 	} else if objectType == Player {
 		currentHealth = int(C.GetMaxHealth(C.uint64_t(guid)))
 	}
-	return currentHealth
+	return int32(currentHealth)
 }
 
 func (g *game) getTargetGuid(objectType uint8, guid uint64) uint64 {

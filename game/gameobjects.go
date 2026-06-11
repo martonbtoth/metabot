@@ -14,13 +14,19 @@ const (
 )
 
 type WowObject struct {
-	Guid          uint64
-	Pointer       uintptr
-	Type          uint8
-	Name          string
-	MaxHealth     int
-	CurrentHealth int
-	Position      Vec3
+	Guid               uint64
+	Pointer            uintptr
+	Type               uint8
+	Name               string
+	MaxHealth          int
+	CurrentHealth      int
+	Position           Vec3
+	TargetGuid         uint64
+	CurrentMana        int32
+	MaxMana            int32
+	Rage               int32
+	Energy             int32
+	CurrentSpellcastId int32
 }
 
 func (w WowObject) String() string {

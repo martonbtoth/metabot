@@ -96,13 +96,19 @@ func (g *game) EnumerateVisibleObjectsCallback(filter int, guid uint64) {
 	}
 
 	g.objects = append(g.objects, WowObject{
-		Guid:          guid,
-		Pointer:       objectUintPtr,
-		Type:          objectType,
-		Name:          g.getName(objectType, guid),
-		MaxHealth:     g.getMaxHealth(objectType, guid),
-		CurrentHealth: g.getCurrentHealth(objectType, guid),
-		Position:      position,
+		Guid:               guid,
+		Pointer:            objectUintPtr,
+		Type:               objectType,
+		Name:               g.getName(objectType, guid),
+		MaxHealth:          g.getMaxHealth(objectType, guid),
+		CurrentHealth:      g.getCurrentHealth(objectType, guid),
+		Position:           position,
+		TargetGuid:         g.getTargetGuid(objectType, guid),
+		CurrentMana:        g.getCurrentMana(objectType, guid),
+		MaxMana:            g.getMaxMana(objectType, guid),
+		Rage:               g.getCurrentRage(objectType, guid),
+		Energy:             g.getCurrentEnergy(objectType, guid),
+		CurrentSpellcastId: g.getCurrentSpellCastId(objectType, guid),
 	})
 }
 
@@ -134,6 +140,54 @@ func (g *game) getMaxHealth(objectType uint8, guid uint64) int {
 		currentHealth = int(C.GetMaxHealth(C.uint64_t(guid)))
 	}
 	return currentHealth
+}
+
+func (g *game) getTargetGuid(objectType uint8, guid uint64) uint64 {
+	targetGuid := uint64(0)
+	if objectType == Unit || objectType == Player {
+		targetGuid = uint64(C.GetTargetGuid(C.uint64_t(guid)))
+	}
+	return targetGuid
+}
+
+func (g *game) getCurrentMana(objectType uint8, guid uint64) int32 {
+	currentMana := int32(0)
+	if objectType == Unit || objectType == Player {
+		currentMana = int32(C.GetCurrentMana(C.uint64_t(guid)))
+	}
+	return currentMana
+}
+
+func (g *game) getMaxMana(objectType uint8, guid uint64) int32 {
+	currentMana := int32(0)
+	if objectType == Unit || objectType == Player {
+		currentMana = int32(C.GetMaxMana(C.uint64_t(guid)))
+	}
+	return currentMana
+}
+
+func (g *game) getCurrentRage(objectType uint8, guid uint64) int32 {
+	currentRage := int32(0)
+	if objectType == Unit || objectType == Player {
+		currentRage = int32(C.GetCurrentRage(C.uint64_t(guid)))
+	}
+	return currentRage
+}
+
+func (g *game) getCurrentEnergy(objectType uint8, guid uint64) int32 {
+	currentEnergy := int32(0)
+	if objectType == Unit || objectType == Player {
+		currentEnergy = int32(C.GetCurrentEnergy(C.uint64_t(guid)))
+	}
+	return currentEnergy
+}
+
+func (g *game) getCurrentSpellCastId(objectType uint8, guid uint64) int32 {
+	currentSpellCastId := int32(0)
+	if objectType == Unit || objectType == Player {
+		currentSpellCastId = int32(C.GetCurrentSpellCastId(C.uint64_t(guid)))
+	}
+	return currentSpellCastId
 }
 
 func (g *game) GetVisibleObjects() []WowObject {

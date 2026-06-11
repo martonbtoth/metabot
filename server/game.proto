@@ -12,6 +12,42 @@ message Spell {
     required string name = 1;
 }
 
+enum UnitType {
+    None          = 0;
+	Item          = 1;
+	Container     = 2;
+	Unit          = 3;
+	Player        = 4;
+	Object    = 5;
+	DynamicObject = 6;
+	Corpse        = 7;
+}
+
+message GameObject {
+    required uint64 Guid = 1;
+	required UnitType Type = 2;
+	optional string Name = 3;
+	optional int32 MaxHealth = 4;
+	optional int32 CurrentHealth = 5;
+	optional Vec3 Position = 6;
+	optional uint64 TargetGuid = 7;
+	optional int32 CurrentMana = 8;
+	optional int32 MaxMana = 9;
+	optional int32 Rage = 10;
+	optional int32 Energy = 11;
+	optional int32 CurrentSpellcastId = 12;
+}
+
+message Vec3 {
+    required float x = 1;
+    required float y = 2;
+    required float z = 3;
+}
+
+message GameObjects {
+    repeated GameObject objects = 1;
+}
+
 message Empty {
 
 }
@@ -19,4 +55,5 @@ message Empty {
 service GameService {
     rpc GetPlayerGuid(Empty) returns (PlayerGuid) {}
     rpc GetSpellbook(Empty) returns (Spellbook) {}
+    rpc GetVisibleObjects(Empty) returns (GameObjects) {}
 }

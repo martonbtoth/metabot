@@ -31,6 +31,49 @@ func (gs *gameServer) GetSpellbook(context.Context, *Empty) (*Spellbook, error) 
 	return &Spellbook{Spells: spells}, nil
 }
 
+func (gs *gameServer) GetVisibleObjects(context.Context, *Empty) (*GameObjects, error) {
+	gs.game.EnumerateVisibleObjects()
+	wowObjects := gs.game.GetVisibleObjects()
+	gameObjects := []*GameObject{}
+	for _, wowObject := range wowObjects {
+		gameObjects = append(gameObjects, wowObjectToGameObject(wowObject))
+	}
+	return &GameObjects{
+		Objects: gameObjects,
+	}, nil
+}
+
+func wowObjectToGameObject(wowObject game.WowObject) *GameObject {
+	unitType := wowUnitTypeToUnitType(wowObject.Type)
+	return &GameObject{
+		Guid: &wowObject.Guid,
+		Name: &wowObject.Name,
+		Type: &unitType,
+	}
+}
+
+func wowUnitTypeToUnitType(wowUnitType uint8) UnitType {
+	switch wowUnitType {
+	case game.None:
+		return UnitType_None
+	case game.Item:
+		return UnitType_Item
+	case game.Container:
+		return UnitType_Container
+	case game.Unit:
+		return UnitType_Unit
+	case game.Player:
+		return UnitType_Player
+	case game.GameObject:
+		return UnitType_Object
+	case game.DynamicObject:
+		return UnitType_DynamicObject
+	case game.Corpse:
+		return UnitType_Corpse
+	}
+	return UnitType_None
+}
+
 func newServer(game game.Game) *gameServer {
 	return &gameServer{game: game}
 }

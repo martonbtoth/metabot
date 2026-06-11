@@ -6,14 +6,20 @@ package game
 import "C"
 
 import (
+	_ "embed"
 	"fmt"
+	"math/rand"
 	"slices"
+	"strings"
 	"superbot/logger"
 	"unsafe"
 )
 
 const OBJECT_TYPE_OFFSET = 0x14
 const DESCRIPTOR_OFFSET = 0x8
+
+//go:embed enumerate_spellbook.lua
+var enumerateSpellbookLua string
 
 type Game interface {
 	GetPlayerGuid() uint64
@@ -23,6 +29,8 @@ type Game interface {
 	GetVisibleObjectByGuid(guid uint64) *WowObject
 	MoveToPosition(position Vec3)
 	RunLua(lua string)
+	RunLuaWithResults(lua string) []string
+	GetAvailableSpells() []string
 }
 
 type game struct {
@@ -39,10 +47,22 @@ func GetGame() *Game {
 	UnlockProtectedLuaFunctions()
 	logger.GetLogger().AddListener(func(logBuffer string, s string) {
 		if globalGame.GetPlayerGuid() != 0 {
-			globalGame.RunLua("SendChatMessage('" + s + "')")
+			globalGame.RunLua("DEFAULT_CHAT_FRAME:AddMessage('" + s + "')")
 		}
 	})
 	return &globalGame
+}
+
+func (g *game) GetAvailableSpells() []string {
+	rawSpellsString := g.RunLuaWithResults(enumerateSpellbookLua)[0]
+
+	splitFn := func(c rune) bool {
+		return c == '\n'
+	}
+
+	spells := strings.FieldsFunc(rawSpellsString, splitFn)
+
+	return spells
 }
 
 func (g *game) GetPlayerGuid() uint64 {
@@ -126,6 +146,41 @@ func (g *game) MoveToPosition(position Vec3) {
 func (g *game) RunLua(lua string) {
 	C.LuaCall(C.CString(lua))
 	NotifyMainThread()
+}
+
+func (g *game) RunLuaWithResults(lua string) []string {
+
+	luaVars := []string{}
+	luaWithPlaceholders := lua
+
+	for i := 0; i < 50; i++ {
+		newLuaVar := randStringRunes(10)
+		newLuaWithPlaceholders := strings.ReplaceAll(luaWithPlaceholders, "{"+fmt.Sprint(i)+"}", newLuaVar)
+		if luaWithPlaceholders == newLuaWithPlaceholders {
+			break
+		}
+		luaVars = append(luaVars, newLuaVar)
+		luaWithPlaceholders = newLuaWithPlaceholders
+	}
+
+	g.RunLua(luaWithPlaceholders)
+
+	results := []string{}
+
+	for _, luaVar := range luaVars {
+		results = append(results, C.GoString(C.GetText(C.CString(luaVar))))
+	}
+
+	return results
+}
+
+func randStringRunes(n int) string {
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
 
 //export EnumerateVisibleObjectsCallback

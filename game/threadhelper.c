@@ -40,6 +40,7 @@ int WndProcCallback(int* hWnd, int Msg, int wParam, int lParam) {
         ActionList* action = PopAction();
         action->action();
         ReleaseSemaphore(action->semaphore, 1, NULL);
+        CloseHandle(action->semaphore);
         free(action);
     }
     return CallWindowProc(oldCallback, hWnd, Msg, wParam, lParam);

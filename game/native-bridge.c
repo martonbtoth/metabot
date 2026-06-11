@@ -15,6 +15,7 @@ const int GET_OBJECT_PTR_FUN_PTR = 0x00464870;
 const int CLICK_TO_MOVE_FUN_PTR = 0x00611130;
 const int CLICK_TO_MOVE_FIX_PTR = 0x860A90;
 const int LUA_CALL_FUN_PTR = 0x00704CD0;
+const int GET_TEXT_FUN_PTR = 0x00703BF0;
 const uint32_t UNIT_NAME_OFFSET = 0xB30;
 const int* NAME_LIST_POINTER = 0xC0E230;
 const int NAME_PTR_GUID_OFFSET = 0xC;
@@ -134,3 +135,8 @@ void LuaCall(char* code) {
     RunOnMainThread(luaCalInternal);
 }
 
+char* GetText(char* varName) {
+    typedef char* __fastcall func(char* varName, unsigned int nonSense, int zero);
+    func* f = (func*)GET_TEXT_FUN_PTR;
+    return f(varName, 0xFFFFFFFF, 0);
+}

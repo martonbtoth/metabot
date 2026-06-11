@@ -14,3 +14,4 @@ float GetObjectPositionZ(uint64_t guid);
 void ClickToMove(float x, float y, float z);
 
 void LuaCall(char* code);
+char* GetText(char* varName);
